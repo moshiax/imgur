@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Imgur Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Фиксировать фон */
+        }
+.container {
+    max-width: 1200px;
+    margin: 20px auto; /* Центрируем контейнер по горизонтали */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-gap: 10px;
+        }
+        .image-grid img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        .image-grid img:hover {
+            opacity: 0.8;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+        }
+.imgur-link {
+    position: absolute;
+    top: 10px; /* Расположить ссылку снизу контейнера изображения */
+    left: 10px; /* Расположить ссылку справа контейнера изображения */
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.img-container {
+    max-width: 90%; /* Максимальная ширина контейнера - 90% */
+    max-height: 90%; /* Максимальная высота контейнера - 90% */
+    margin: auto; /* Центрируем контейнер с изображением */
+    overflow: hidden; /* Скрыть части изображения, выходящие за границы контейнера */
+    position: relative; /* Устанавливаем позиционирование контейнера */
+}
+
+.img-container img {
+    width: 100%; /* Ширина изображения равна ширине контейнера */
+    height: 100%; /* Высота изображения равна высоте контейнера */
+    object-fit: contain; /* Масштабируем изображение, чтобы оно целиком помещалось в контейнер */
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-grid" id="imageGrid">
+            <!-- Images will be inserted here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        function generateRandomImgurImage() {
+            const char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const id = Array.from({ length: 5 }, () => char[Math.floor(Math.random() * char.length)]).join("") + "b";
+            return `https://i.imgur.com/${id}.png`;
+        }
+
+        function checkImageLoad(image) {
+            if (image.naturalWidth !== 161) {
+                image.style.opacity = 1;
+            } else {
+                reloadImage(image);
+            }
+        }
+
+        function reloadImage(image) {
+            image.src = generateRandomImgurImage();
+        }
+
+function populateImageGrid() {
+    const imageGrid = document.getElementById("imageGrid");
+    const numColumns = Math.floor(window.innerWidth / 160); // Определяем количество столбцов на экране
+    const numRows = Math.ceil(window.innerHeight / 160); // Определяем количество строк на экране
+    const numImages = numColumns * numRows; // Вычисляем общее количество изображений для заполнения экрана
+    for (let i = 0; i < numImages; i++) {
+        const url = generateRandomImgurImage();
+        const img = `<img src="${url}" style="opacity:0;" onload="checkImageLoad(this)" onclick="openImage(this)">`;
+        imageGrid.insertAdjacentHTML("beforeend", img);
+    }
+}
+
+        // Generate initial images
+        populateImageGrid();
+
+        // Function to open image in a modal
+function openImage(image) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+
+const container = document.createElement('div');
+container.className = 'img-container'; // Добавляем класс для контейнера изображения
+
+const img = document.createElement('img');
+img.style.maxWidth = '100%'; // Изменено на 100%
+img.style.maxHeight = '100%'; // Изменено на 100%
+img.onload = function() {
+    const imgurLink = document.createElement('a');
+    imgurLink.href = image.src.replace('b.png', '.png');
+    imgurLink.target = '_blank';
+    imgurLink.innerText = 'Open on Imgur';
+    imgurLink.className = 'imgur-link';
+
+    container.appendChild(img); // Добавляем изображение в контейнер
+    container.appendChild(imgurLink); // Добавляем ссылку в контейнер после изображения
+
+    modal.appendChild(container); // Добавляем контейнер в модальное окно
+    document.body.appendChild(modal);
+};
+img.src = image.src.replace('b.png', '.png');
+
+
+    modal.onclick = function() {
+        document.body.removeChild(modal);
+    };
+}
+
+
+
+        // Regenerate images when scrolling to near bottom of page
+        window.addEventListener('scroll', function() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+                populateImageGrid();
+            }
+        });
+    </script>
+</body>
+</html>
